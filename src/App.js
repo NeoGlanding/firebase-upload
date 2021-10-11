@@ -1,24 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import React, {useState} from 'react'
+import {storage} from './firebase/index'
 
 function App() {
+  const [image, setImage] = useState(null);
+
+  const handleChange = e => {
+    if (e.target.files[0]) {
+      setImage(e.target.files[0])
+    }
+  }
+
+  const uploadHandler = e => {
+    e.preventDefault();
+    const uploadTask = storage.ref(`images/${image.name}`).put(image);
+    uploadTask.on(
+      'state_changed',
+      snapshot => {},
+      err => console.log(err),
+      () => {
+        storage
+        .ref("images")
+        .child(image.name)
+        .getDownloadURL()
+        .then(url => console.log(url))        
+      }
+    )
+  }
+
+  console.log(image)
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <form onSubmit={uploadHandler}>
+      <input type="file" onChange={handleChange} />
+      <button>Submit</button>
+    </form>
   );
 }
 
